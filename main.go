@@ -26,7 +26,7 @@ func renderTemplate(w http.ResponseWriter, r *http.Request){
 	// load the template
 	tmpl := GetTemplate("templates/index.gohtml")
 	tmpl.ExecuteTemplate(w,"index.gohtml", data	)
-	writeFile("html/index.html", data)
+	writeFile("html/test.html", data)
 }
 func GetTemplate(tpath string)*template.Template{
 	cmd := exec.Command("touch", tpath)
@@ -50,15 +50,26 @@ func writeFile(location string, data string){
 	for i < len(locations){
 		if i == len(locations) - 1{
 			var re = regexp.MustCompile(`(\.[a-z]+)$`)
-			t, err := template.ParseFiles(string(re.ReplaceAll([]byte("templates/"+locations[i]),[]byte(".gohtml"))))
-			if err != nil {
-				log.Print(err)
-				return
+			tByte := re.ReplaceAll([]byte("templates/"+locations[i]),[]byte(".gohtml"))
+			if Exists(string(tByte)) {
+				t, err := template.ParseFiles(string(tByte))
+				if err != nil {
+					log.Print(err)
+				}
+				f, _ := os.Create(d + "/" + locations[i])
+				t.Execute(f, data)
+				defer f.Close()
+				println(locations[i] + " created")
+			}else {
+				t, err := template.ParseFiles(string("templates/index.gohtml"))
+					if err != nil {
+						log.Print(err)
+					}
+					f, _ := os.Create(d+"/"+locations[i])
+					t.Execute(f, data)
+					defer f.Close()
+					println(locations[i]+" created")
 			}
-			f, _ := os.Create(d+"/"+locations[i])
-			t.Execute(f, data)
-			defer f.Close()
-			println(locations[i]+" created")
 		}else{
 			d = string(d) + string(locations[i])
 			os.Mkdir(locations[i], 755)
@@ -66,5 +77,15 @@ func writeFile(location string, data string){
 		}
 	i++
 	}
-	
+}
+
+
+
+func Exists(name string) bool {
+	if _, err := os.Stat(name); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+	return true
 }
