@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,9 +15,11 @@ import (
 
 // main function to boot up everything
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/", renderTemplate).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	data := "Test"
+	writeFile("html/test.html", data)
+	// router := mux.NewRouter()
+	// router.HandleFunc("/", renderTemplate).Methods("GET")
+	// log.Fatal(http.ListenAndServe(":8000", router))
 }
 func renderTemplate(w http.ResponseWriter, r *http.Request){
 	// gather the data to pass to the template
@@ -26,7 +27,6 @@ func renderTemplate(w http.ResponseWriter, r *http.Request){
 	// load the template
 	tmpl := GetTemplate("templates/index.gohtml")
 	tmpl.ExecuteTemplate(w,"index.gohtml", data	)
-	writeFile("html/test.html", data)
 }
 func GetTemplate(tpath string)*template.Template{
 	cmd := exec.Command("touch", tpath)
